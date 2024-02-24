@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}"> -->
+    <link rel="stylesheet" href="/static/styles.css">
+    
+    <title>nSTT</title>
+</head>
+<body>
+    <h1>Defence Digital - Noisy Speech to Text !</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input id="uploadFile" type="file" name="file" id="fileInput" required>
+        <br>
+        <br>
+        <!-- hidden following two lines as no longer needed toggle here, client-side functionality is still present tho -->
+        <label for="toggleInput" style="display:none;">Tick if the audio has background noise:</label>
+        <input id="uploadToggle" type="checkbox" id="toggleInput" name="toggle" style="display:none;">
+
+        <label for="noise_dropdown">Select a noise reduction method:</label>
+        <select id="noise_dropdown" name="selectedOptionNoise">
+            <option value="no">No noise reduction is the audio has low/no noise</option>
+            <option value="dfn">DeepFilterNet reduction only for normal background noise</option>
+            <option value="sg">Spectral Gating only for normal background noise</option>
+            <option value="dfn_no">DeepFilterNet for diarization and no noise reduction for transcription for AI-generated noise</option>
+            <!-- TODO: add in noise types -->
+        </select>
+
+        <br>
+        <br>
+        <button id="submitButton" type="submit">Transcribe</button>
+        <img id="loadingGif" src="{{ url_for('static', filename='loading.gif') }}" width="20" height="20" style="display: none;">
+    </form>
+
+    <br>
+    <label id="audioPlayerLabel" for="audioPlayer" style="display:none;">Original audio:</label>
+    <br>
+    <audio id="audioPlayer" style="display:none;" controls>
+        <source src="/static/audio/playback.wav" type="audio/x-wav">
+        Your browser does not support the audio player.
+    </audio>
+
+    <div id="processing" style="display:none;">
+        <h2>Audio data is being transcribed, please wait</h2>
+    </div>
+    <br>
+    <div id="result" style="display:none;"></div>  
+
+    <!-- <br> -->
+    <!-- New button to calculate length (will be translation)-->
+    <!-- <button id="translateButton" style="display:none;">Translate Transcription</button> -->
+
+    <a href="{{ url_for('download_csv') }}" download="output.csv" id="downloadButton" style="display:none;">Download CSV</a>
+    <br>
+    <br>
+
+    <form id="languageForm" style="display:none;">
+        <label for="dropdown">Select a language to translate to:</label>
+        <select id="dropdown" name="selectedOption">
+            <option value="english">English</option>
+            <option value="dutch">Dutch</option>
+            <option value="german">German</option>
+            <option value="french">French</option>
+            <option value="spanish">Spanish</option>
+            <option value="russian">Russian</option>
+            <option value="chinese">Chinese (simplified)</option>
+        </select>
+        <!-- <button type="Button", id="translateButton" onclick="submitForm()">Submit</button> -->
+        <button id="translateButton" type="button">Submit</button>
+        <img id="loadingGif2" src="{{ url_for('static', filename='loading.gif') }}" width="20" height="20" style="display: none;">
+    </form>
+
+    <br>
+    <br>
+    <div id="translationResult" style="display:none;"></div>
+
+    <!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> -->
+    <!-- script library that we have downloaded and save in the static/javascript that will allow us to run the script below -->
+    <!--  -->
+    <script src="{{ url_for('static', filename='javascript/jquery-3.6.4.min.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#uploadForm').submit(function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                var selectedOptionNoise = $('#noise_dropdown').val();
+                var processingText = document.getElementById('processing');
+                var btn1 = document.getElementById('uploadToggle');
+                var btn2 = document.getElementById('submitButton');
+                var loadingGif = document.getElementById('loadingGif');
+                var downloadButton = document.getElementById('downloadButton');
+                // processingText.show();
+                btn1.disabled = true;
+                btn2.disabled = true;
+                loadingGif.style.display = 'inline';
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/upload',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        // processingText.hide();
+                        btn1.disabled = false;
+                        btn2.disabled = false;
+                        loadingGif.style.display = 'none';
+                        console.log(data.output)
+
+
+                        var resultContainer = $('#result');
+                        data.output.forEach(function(entry) {
+                            var speaker = entry[0];
+                            var words = entry[1];
+
+                            var speakerInfo = '<p>' + speaker + '</p>';
+    
+                        var sentence = '';
+
+                        words.forEach(function(wordInfo) {
+                            var word = wordInfo[0];
+                            var timestamp = wordInfo[1];
+                            sentence += '<a href="#" class="word-link" data-timestamp="' + timestamp + '">' + word + '</a> ';
+                        });
+
+                        resultContainer.append(speakerInfo + '<p>' + sentence.trim() + '</p><br>');
+                    });
+
+
+                        $('.word-link').click(function(e) {
+                            e.preventDefault();
+                            var timestamp = $(this).data('timestamp');
+                            console.log('Clicked on word with timestamp: ' + timestamp);
+                            // Add your logic to handle the click event, e.g., navigate to the timestamp URL
+                            audioPlayer.currentTime = timestamp;
+                            audioPlayer.play();
+                        });
+
+
+                        $('#result').show();
+                        $('#downloadButton').show();
+                        $('#translateButton').show();
+                        $('#languageForm').show();
+
+                        // Reload the audio player with the (hopefully) uploaded audio
+                        var audioPlayer = document.getElementById('audioPlayer');
+                        var audioPlayerLabel = document.getElementById('audioPlayerLabel');
+                        audioPlayer.load();
+                        $('#audioPlayer').show();
+                        $('#audioPlayerLabel').show();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+      
+            $(document).ready(function() {
+                $('#translateButton').on('click', function() {
+                    var btn3 = document.getElementById('translateButton');
+                    btn3.disabled = true;
+                    var loadingGif2 = document.getElementById('loadingGif2')
+                    loadingGif2.style.display = 'inline';
+                    var selectedOption = $('#dropdown').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/translate',
+                        data: { selectedOption: selectedOption },
+                        success: function(response) {
+                            console.log(response)
+                            $('#translationResult').text(response.translated);
+                            $('#translationResult').text(response.dest_lang+' translation: \n\n' + response.translated);
+                            $('#translationResult').show();
+                            btn3.disabled = false;
+                            loadingGif2.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

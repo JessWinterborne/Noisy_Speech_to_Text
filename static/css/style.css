@@ -1,0 +1,93 @@
+#translationResult {
+    white-space: pre-line;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.drop-area {
+    border: 2px dashed #3498db;
+    border-radius: 5px;
+    padding: 25px;
+    text-align: center;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.drop-area.highlight {
+    border-color: #2ecc71;
+}
+
+#file-select {
+    display: none; /* Hide the default file input */
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3498db; /* Button background color */
+    color: #fff; /* Button text color */
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: #2980b9; /* Button background color on hover */
+}
+
+.upload-button {
+    margin-top: 20px; /* Add some spacing between the file list and the button */
+    margin-bottom: 20px;
+    background-color: #3498db; /* Button background color */
+    color: #fff; /* Button text color */
+    padding: 10px 20px; /* Button padding */
+    border: none; /* Remove button border */
+    border-radius: 5px; /* Button border radius */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.settings {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.info {
+    border: 2px solid #66afe9;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #e5f7ff; /* Light blue background */
+    color: #333; /* Dark gray text */
+}
+
+#progress-info {
+    height: 200px;
+    overflow-y: auto;
+}
+
+.box-heading {
+    margin-top: 0;
+}
+
+.progress-record {
+    margin: 0;
+}

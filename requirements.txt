@@ -1,0 +1,15 @@
+flask==3.0.2
+celery
+redis 
+openai-whisper
+numpy
+scipy
+torch 
+torchvision 
+torchaudio
+pydub
+deepfilternet
+werpy
+noisereduce
+transformers
+pyannote.audio
